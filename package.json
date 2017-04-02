@@ -1,0 +1,23 @@
+{
+  "name": "",
+  "version": "0.0.1",
+  "description": "a GitHub Integration that ...",
+  "author": "",
+  "license": "ISC",
+  "repository": "https://github.com/",
+  "scripts": {
+    "start": "probot run ./index.js",
+    "test": "xo --extend probot"
+  },
+  "dependencies": {
+    "probot": "^0.3"    
+  },
+  "engines": {
+    "node": ">= 7.7.0",
+    "npm": ">= 4.0.0"
+  },
+  "devDependencies": {
+    "eslint-config-probot": "^0.1.0",
+    "xo": "^0.17.1"
+  }
+}
