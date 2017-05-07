@@ -35,16 +35,21 @@ module.exports = robot => {
   }
 
   async function handleThaw(installation, repository) {
-    const freeze = await forRepository(context.github, repository);
+    const github = await robot.auth(installation.id);
+    const freeze = await forRepository(github, repository);
 
-    const frozenIssues = await context.github.search.issues({q:'label:' + this.labelName});
-    frozenIssues.items.forEach(issue => {
-      const comment = freeze.getLastFreeze(context.github.issues.getComments(githubHelper.commentUrlToIssueRequest(issue.comments_url)));
-
-      if (freeze.unfreezable(comment)) {
-        freeze.unfreeze(issue, formatParser.propFromComment(comment));
-      }
-    });
+    const frozenIssues = await github.search.issues({q:'label:' + freeze.config.labelName});
+    await Promise.all(frozenIssues.items.map(async issue => {
+      const issueObj = githubHelper.commentUrlToIssueRequest(issue.comments_url);
+      github.issues.getComments(issueObj).then(comments => {
+        const comment = freeze.getLastFreeze(comments);
+        if (comment !== null && freeze.unfreezable(comment)) {
+          console.log('unfreezable!!');
+          freeze.unfreeze(issue, formatParser.propFromComment(comment.body));
+        }
+        console.log('post test');
+      });
+    }));
   }
 
   async function forRepository(github, repository) {
