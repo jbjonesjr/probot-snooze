@@ -24,8 +24,10 @@ module.exports = robot => {
   }
 
   async function handleFreeze(event, context) {
+    console.log('\ncontext', context, '\nevent', event);
     const freeze = await forRepository(context.github, event.payload.repository);
     const comment = event.payload.comment;
+    console.log(freeze.config.perform, context.isBot, comment.body, freeze.freezable(comment));
     if (freeze.config.perform && !context.isBot && freeze.freezable(comment)) {
       freeze.freeze(
         context,
@@ -63,11 +65,11 @@ module.exports = robot => {
       config = yaml.load(new Buffer(data.content, 'base64').toString()) || {};
       config = Object.assign(config, {perform:true});
     } catch (err) {
+      console.log('err', err);
       visit.stop(repository);
     }
 
     config = Object.assign(config, {owner, repo, logger: robot.log});
-
     return new Freeze(github, config);
   }
 };
