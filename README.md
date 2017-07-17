@@ -19,6 +19,7 @@ labelName : 'probot:snooze',
 labelColor : 'gray'
 ```
 ## Setup
+Using .env.example, populate your environment variables file.
 
 ```
 # Install dependencies
