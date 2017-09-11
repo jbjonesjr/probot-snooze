@@ -1,5 +1,4 @@
 {
-  "probotUsername" : (process.env.APP_NAME || 'probot-snooze') + '[bot]',
   "labelName" : "probot:snooze",
   "labelColor" : "gray",
   "defaultFreezeDuration" : 7,
