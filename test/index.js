@@ -57,12 +57,15 @@ perform: true
       },
       search: {
         issues: expect.createSpy().andReturn(Promise.resolve({
-          data:{items: [{comments_url:'https://api.github.com/repos/baxterthehacker/public-repo/issues/2/comments',
-            labels:[{
-              url: 'https://api.github.com/repos/baxterthehacker/public-repo/labels/probot:freeze',
-              name: 'probot:freeze',
-              color: 'fc2929'
-            }]}]
+          data:{
+            total_count: 1,
+            incomplete_results: false,
+            items: [{comments_url:'https://api.github.com/repos/baxterthehacker/public-repo/issues/2/comments',
+              labels:[{
+                url: 'https://api.github.com/repos/baxterthehacker/public-repo/labels/probot:freeze',
+                name: 'probot:freeze',
+                color: 'fc2929'
+              }]}]
           }})) // Q:'label:' + this.labelName
       }
     };
@@ -165,7 +168,7 @@ perform: true
     });
   });
 
-  it('test visitor activation', async () => {
+  it('test scheduled thaw success', async () => {
     await robot.receive({
       event: 'schedule',
       payload: {
@@ -200,6 +203,29 @@ perform: true
     });
   });
 
+  it('test scheduled thaw failure', async () => {
+    github.search.issues = expect.createSpy().andReturn(Promise.resolve({
+      data:{
+        total_count: 0,
+        incomplete_results: false,
+        items: []
+      }
+    })); // Q:'label:' + this.labelName
+
+    await robot.receive({
+      event: 'schedule',
+      payload: {
+        action: 'repository',
+        repository: {
+          owner: {
+            login:'baxterthehacker'
+          },
+          name:'public-repo'
+        },
+        installation: {
+          id: 13055
+        }}});
+  });
   it('test valid comments', async () => {
     const defaultFreezeDuration = 7;
     const validMessages = [

@@ -47,15 +47,24 @@ module.exports = robot => {
     const q = `label:"${freeze.config.labelName}" repo:${owner}/${repo}`;
 
     context.github.search.issues({q}).then(resp => {
-      resp.data.items.forEach(issue => {
-        context.github.issues.getComments(githubHelper.parseCommentURL(issue.comments_url)).then(resp => {
-          return freeze.getLastFreeze(resp.data);
-        }).then(lastFreezeComment => {
-          if (freeze.unfreezable(lastFreezeComment)) {
-            freeze.unfreeze(issue, formatParser.propFromComment(lastFreezeComment));
-          }
+      if (resp.data.total_count > 0) {
+        resp.data.items.forEach(issue => {
+          context.github.issues.getComments(githubHelper.parseCommentURL(issue.comments_url)).then(resp => {
+            return freeze.getLastFreeze(resp.data);
+          }).then(lastFreezeComment => {
+            if (Object.prototype.hasOwnProperty.call(lastFreezeComment, 'body')) {
+              if (freeze.unfreezable(lastFreezeComment)) {
+                freeze.unfreeze(issue, formatParser.propFromComment(lastFreezeComment));
+              }
+            } else {
+              robot.log(new Date() + ': ' + issue.comments_url + ' didn\'t find the snooze comment');
+            }
+          });
+
         });
-      });
+      } else {
+        console.log(new Date() + ': No issues found to thaw at this time');
+      }
     });
     console.log('scheduled thaw run complete');
   }
