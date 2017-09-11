@@ -1,10 +1,13 @@
 const createScheduler = require('probot-scheduler');
 const Freeze = require('./lib/freeze');
-const defaults = require('./lib/defaults');
 const parseReminder = require('./lib/reminder');
 const commands = require('./lib/commands');
 
-/* Configuration Variables */
+const defaults = {
+  reminders: {
+    label: 'reminder'
+  }
+};
 
 module.exports = robot => {
   commands(robot, 'remind', async (context, command) => {
@@ -15,8 +18,8 @@ module.exports = robot => {
         reminder.who = context.payload.comment.user.login;
       }
 
-      const config = await context.config('probot-snooze.yml', defaults);
-      const freeze = new Freeze(context.github, config);
+      const config = await context.config('config.yml', defaults);
+      const freeze = new Freeze(context.github, config.reminders);
 
       freeze.freeze(context, reminder);
     }
@@ -27,11 +30,11 @@ module.exports = robot => {
   robot.on('schedule.repository', handleThaw);
 
   async function handleThaw(context) {
-    const config = await context.config('probot-snooze.yml', defaults);
+    const config = await context.config('config.yml', defaults);
 
-    const freeze = new Freeze(context.github, config);
+    const freeze = new Freeze(context.github, config.reminders);
     const {owner, repo} = context.repo();
-    const q = `label:"${freeze.config.labelName}" repo:${owner}/${repo}`;
+    const q = `label:"${freeze.config.label}" repo:${owner}/${repo}`;
 
     const resp = await context.github.search.issues({q});
 
