@@ -43,8 +43,10 @@ module.exports = robot => {
     const config = await context.config('probot-snooze.yml', JSON.parse(fs.readFileSync('./etc/defaults.json', 'utf8')));
 
     const freeze = new Freeze(context.github, config);
+    const {owner, repo} = context.repo();
+    const q = `label:"${freeze.config.labelName}" repo:${owner}/${repo}`;
 
-    context.github.search.issues({q:'label:' + freeze.config.labelName, repo:context.repo().full_name}).then(resp => {
+    context.github.search.issues({q}).then(resp => {
       if (resp.data.total_count > 0) {
         resp.data.items.forEach(issue => {
           context.github.issues.getComments(githubHelper.parseCommentURL(issue.comments_url)).then(resp => {
@@ -58,6 +60,7 @@ module.exports = robot => {
               robot.log(new Date() + ': ' + issue.comments_url + ' didn\'t find the snooze comment');
             }
           });
+
         });
       } else {
         console.log(new Date() + ': No issues found to thaw at this time');
