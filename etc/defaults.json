@@ -1,5 +1,4 @@
 {
-  "probotUsername" : "probot-snooze[bot]",
   "labelName" : "probot:snooze",
   "labelColor" : "gray",
   "defaultFreezeDuration" : 7,
